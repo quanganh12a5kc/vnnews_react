@@ -13,3 +13,8 @@ export const getData = async (page) => {
   });
   return response.data;
 };
+
+export const getPost = async (id) => {
+  let response = await axios.get(apiUrl + "getNewsById/" + id);
+  return response.data;
+};

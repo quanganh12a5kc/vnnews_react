@@ -1,14 +1,26 @@
 import { useEffect, useState } from "react";
 import { getData, getPost, getSourceNames } from "../service/postService";
 import { Header } from "./Header";
+import ModalPostDetail from "./ModalPostDetail";
 export const Homepage = () => {
   const [data, setData] = useState({
     latest_news: [],
     hot_news: [],
     read_news: [],
   });
+  const [readingNews, setReadingNews] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [sourceNames, setSourceNames] = useState(false);
   const [page, setPage] = useState(1);
+
+  //open, close modal
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   //load latest_news, read_news, hot_news
   const loadData = (page) => {
@@ -39,9 +51,29 @@ export const Homepage = () => {
     loadData(page);
   }, []);
 
+  useEffect(() => {
+    if (page == 0) {
+      setPage(localStorage.getItem("total_pages"));
+    }
+    if (page > localStorage.getItem("total_pages")) {
+      setPage(1);
+    }
+    loadData(page);
+  }, [page]);
+
+  const getDetail = (id) => {
+    getPost(id)
+      .then((data) => {
+        setReadingNews(data.news);
+        openModal();
+      })
+      .catch((error) => {
+        console.error("getDetail failed:", error);
+      });
+  };
   return (
     <div>
-      <Header></Header>
+      <Header sourceNames={sourceNames} getDetail={getDetail}></Header>
       <div>
         <div className="content">
           <div className="left">
@@ -67,7 +99,9 @@ export const Homepage = () => {
                       </p>
                     </div>
                     <div className="title">
-                      <a>{item["title"]}</a>
+                      <a onClick={() => getDetail(item["id"])}>
+                        {item["title"]}
+                      </a>
                     </div>
                   </div>
                 ))}
@@ -95,7 +129,7 @@ export const Homepage = () => {
                     </p>
                   </div>
                   <div className="title">
-                    <a>{item["title"]}</a>
+                    <a onClick={() => getDetail(item["id"])}>{item["title"]}</a>
                   </div>
                 </div>
               ))}
@@ -103,6 +137,17 @@ export const Homepage = () => {
             <div className="read-news"></div>
           </div>
         </div>
+        {isModalOpen && (
+          <ModalPostDetail
+            id={readingNews["id"]}
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            content={readingNews["content"]}
+            title={readingNews["title"]}
+            tags={readingNews["tag_names"]}
+            isLoadData={loadData}
+          />
+        )}
       </div>
     </div>
   );
