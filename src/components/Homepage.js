@@ -134,7 +134,20 @@ export const Homepage = () => {
                 </div>
               ))}
             </div>
-            <div className="read-news"></div>
+            <div className="read-news">
+              {data.read_news.map((item, key) => (
+                <div key={key} className="frame">
+                  <div className="source">
+                    <p>
+                      <a href={item["link"]}>{sourceNames[item["source"]]}</a>
+                    </p>
+                  </div>
+                  <div className="title">
+                    <a onClick={() => getDetail(item["id"])}>{item["title"]}</a>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         {isModalOpen && (
