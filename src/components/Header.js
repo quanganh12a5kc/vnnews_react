@@ -1,10 +1,12 @@
 import { useRef, useState, useEffect } from "react";
-import { search } from "../service/postService";
+import { search, getUser } from "../service/postService";
 import { useNavigate } from "react-router-dom";
 
 export const Header = (props) => {
   const [input, setInput] = useState("");
   const [searchResults, setsearchResults] = useState([]);
+  const [user, setUser] = useState(false);
+
   let timeoutIdRef = useRef(null);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const navigate = useNavigate();
@@ -14,6 +16,29 @@ export const Header = (props) => {
       navigate("/search/" + input);
     }
   };
+
+  const logOut = () => {
+    localStorage.removeItem("token");
+    setUser(false);
+  };
+
+  //get user
+  const getU = () => {
+    getUser()
+      .then((data) => {
+        if (data.user !== "") {
+          setUser(data.user);
+          console.log(data);
+        }
+      })
+      .catch((error) => {
+        console.error("getUser() failed:", error);
+      });
+  };
+
+  useEffect(() => {
+    getU();
+  }, []);
 
   const handleInputChange = (event) => {
     const inputValue = event.target.value;
@@ -88,18 +113,34 @@ export const Header = (props) => {
             ))}
         </div>
       </div>
-      <div className="account">
-        <div className="login">
-          <a href="/login">
-            <h3>Login</h3>
-          </a>
+      {!user && (
+        <div className="account">
+          <div className="login">
+            <a onClick={() => navigate("/login")}>
+              <h3>Login</h3>
+            </a>
+          </div>
+          <div className="signup">
+            <a href="/signup">
+              <h3>Sign up</h3>
+            </a>
+          </div>
         </div>
-        <div className="signup">
-          <a href="/signup">
-            <h3>Sign up</h3>
-          </a>
+      )}
+      {user && (
+        <div className="account">
+          <div className="login">
+            <a onClick={() => navigate("/")}>
+              <h3>{user.name}</h3>
+            </a>
+          </div>
+          <div className="signup">
+            <a onClick={() => logOut()}>
+              <h3>Log out</h3>
+            </a>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
