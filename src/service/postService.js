@@ -23,3 +23,20 @@ export const search = async (input, take) => {
   let response = await axios.get(apiUrl + "search/" + input + "/" + take);
   return response.data;
 };
+
+export const login = async (email, password) => {
+  let response = await axios.post(apiUrl + "login", {
+    email: email,
+    password: password,
+  });
+  return response.data;
+};
+
+export const getUser = async () => {
+  let response = await axios.post(apiUrl + "getUser", null, {
+    headers: {
+      Authorization: localStorage.getItem("token"),
+    },
+  });
+  return response.data;
+};
